@@ -1,9 +1,9 @@
-// Redirect if not on Blogspot
+// ✅ Restrict to Blogspot domain only
 if (location.hostname !== "24sports-network.blogspot.com") {
   location.href = "https://24sports-network.blogspot.com";
 }
 
-// Firebase config
+// ✅ Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyD4-VCUGPN1XyQ1Xr-nsygATasnRrukWr4",
   authDomain: "spn-livechat.firebaseapp.com",
@@ -17,6 +17,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
+// ✅ DOM references
 const loginBtn = document.getElementById('login-btn');
 const chatContainer = document.getElementById('chat-container');
 const loginContainer = document.getElementById('login-container');
@@ -24,14 +25,17 @@ const sendBtn = document.getElementById('send-btn');
 const messageInput = document.getElementById('message-input');
 const chatMessages = document.getElementById('chat-messages');
 
-let currentUser = null;
+// ✅ Admin list
 const admins = ["24sports.social@gmail.com"];
+let currentUser = null;
 
+// ✅ Login with Google
 loginBtn.addEventListener('click', () => {
   const provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider);
 });
 
+// ✅ Monitor login status
 auth.onAuthStateChanged(user => {
   if (user) {
     currentUser = user;
@@ -41,6 +45,7 @@ auth.onAuthStateChanged(user => {
   }
 });
 
+// ✅ Message send events
 sendBtn.addEventListener('click', sendMessage);
 messageInput.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) {
@@ -49,11 +54,12 @@ messageInput.addEventListener('keydown', e => {
   }
 });
 
+// ✅ Send message logic
 function sendMessage() {
   const text = messageInput.value.trim();
   if (!text) return;
 
-  const isLink = /(https?:\\/\\/|www\\.)\\S+/i.test(text);
+  const isLink = /(https?:\/\/|www\.)\S+/i.test(text);
   if (isLink && !admins.includes(currentUser.email)) {
     alert("Links are not allowed.");
     return;
@@ -68,16 +74,18 @@ function sendMessage() {
     time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     timestamp: now.getTime()
   };
+
   db.ref('messages').push(msg);
   messageInput.value = '';
 }
 
+// ✅ Load and display messages
 function listenMessages() {
   db.ref('messages').on('value', snapshot => {
     chatMessages.innerHTML = '';
     snapshot.forEach(child => {
       const msg = child.val();
-      if (Date.now() - msg.timestamp > 86400000) return;
+      if (Date.now() - msg.timestamp > 86400000) return; // hide old msgs >24h
 
       const div = document.createElement('div');
       div.className = 'message ' + (msg.uid === currentUser.uid ? 'sent' : 'received');
