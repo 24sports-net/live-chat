@@ -2,26 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Live Chat UI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Live Chat</title>
   <link rel="stylesheet" href="style.css" />
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 </head>
 <body>
   <div id="login-container">
     <button id="login-btn">Sign in with Google</button>
   </div>
-
-  <div id="chat-container" style="display:none">
+  <div id="chat-container" style="display:none;">
     <div id="chat-messages"></div>
-    <div id="chat-input-area">
-      <textarea id="message-input" placeholder="Type a message..."></textarea>
-      <button id="send-btn">&#9658;</button>
+    <div id="input-bar">
+      <input id="message-input" placeholder="Type a message..." />
+      <button id="send-btn">➤</button>
     </div>
   </div>
-
   <script src="app.js"></script>
 </body>
 </html>
