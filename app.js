@@ -5,7 +5,8 @@ const firebaseConfig = {
   projectId: "spn-livechat",
   storageBucket: "spn-livechat.appspot.com",
   messagingSenderId: "979619554738",
-  appId: "1:979619554738:web:a36c0a793988913d5670ab"
+  appId: "1:979619554738:web:a36c0a793988913d5670ab",
+  measurementId: "G-8D9XXZSCR9"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -14,9 +15,9 @@ const db = firebase.database();
 
 const ADMIN_EMAILS = ["24sports.social@gmail.com"];
 
+const loginBtn = document.getElementById("login-btn");
 const loginContainer = document.getElementById("login-container");
 const chatContainer = document.getElementById("chat-container");
-const loginBtn = document.getElementById("login-btn");
 const sendBtn = document.getElementById("send-btn");
 const messageInput = document.getElementById("message-input");
 const chatMessages = document.getElementById("chat-messages");
@@ -28,7 +29,7 @@ loginBtn.onclick = () => {
   auth.signInWithPopup(provider);
 };
 
-auth.onAuthStateChanged((user) => {
+auth.onAuthStateChanged(user => {
   if (user) {
     currentUser = user;
     loginContainer.style.display = "none";
@@ -48,14 +49,14 @@ function sendMessage() {
   const text = messageInput.value.trim();
   if (!text) return;
 
-  const isLink = /https?:\/\/\S+/i.test(text);
+  const isLink = /https?:\\/\\//i.test(text);
   if (isLink && !ADMIN_EMAILS.includes(currentUser.email)) {
-    alert("Links are not allowed.");
+    alert("Links are not allowed");
     messageInput.value = "";
     return;
   }
 
-  const message = {
+  const msg = {
     name: currentUser.displayName,
     email: currentUser.email,
     photo: currentUser.photoURL || "https://www.gravatar.com/avatar/?d=mp",
@@ -63,48 +64,46 @@ function sendMessage() {
     timestamp: Date.now()
   };
 
-  db.ref("messages").push(message);
+  db.ref("messages").push(msg);
   messageInput.value = "";
 }
 
-db.ref("messages").on("value", (snapshot) => {
-  chatMessages.innerHTML = "";
+function renderMessage(key, msg) {
+  const isSent = msg.email === currentUser.email;
+  const isAdmin = ADMIN_EMAILS.includes(currentUser.email);
   const now = Date.now();
 
-  snapshot.forEach((child) => {
-    const msg = child.val();
-    const age = now - msg.timestamp;
+  if (now - msg.timestamp > 86400000) {
+    db.ref("messages/" + key).remove();
+    return;
+  }
 
-    if (age >= 86400000) {
-      db.ref("messages/" + child.key).remove();
-      return;
-    }
+  const div = document.createElement("div");
+  div.className = `message ${isSent ? "sent" : "received"}`;
 
-    const isSent = msg.email === currentUser?.email;
-    const isAdmin = ADMIN_EMAILS.includes(currentUser?.email);
+  const profile = `<img src="${msg.photo}" class="profile" alt="user">`;
 
-    const msgEl = document.createElement("div");
-    msgEl.className = `message ${isSent ? "sent" : "received"}`;
-    msgEl.innerHTML = `
-      <img src="${msg.photo}" alt="pfp">
-      <div class="bubble">
-        <div class="name">${msg.name}</div>
-        <div>${msg.text}</div>
-        <div class="time-delete-wrapper">
-          <span>${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-          ${isAdmin ? `
-          <div class="admin-menu">
-            <button class="menu-btn">⋮</button>
-            <div class="menu-options">
-              <button onclick="deleteMessage('${child.key}')">Delete</button>
-            </div>
-          </div>` : ""}
-        </div>
-      </div>
-    `;
-    chatMessages.appendChild(msgEl);
-  });
+  const deleteOption = isAdmin || currentUser.email === msg.email
+    ? `<div class="options"><button class="delete-btn" onclick="deleteMessage('${key}')">⋮</button></div>`
+    : "";
 
+  div.innerHTML = `
+    ${isSent ? "" : profile}
+    <div class="bubble">
+      <div class="name">${msg.name}</div>
+      <div>${msg.text}</div>
+      <div class="time">${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+      ${deleteOption}
+    </div>
+    ${isSent ? profile : ""}
+  `;
+
+  chatMessages.appendChild(div);
+}
+
+db.ref("messages").on("value", snapshot => {
+  chatMessages.innerHTML = "";
+  snapshot.forEach(child => renderMessage(child.key, child.val()));
   chatMessages.scrollTop = chatMessages.scrollHeight;
 });
 
