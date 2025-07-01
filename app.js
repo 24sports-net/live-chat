@@ -13,14 +13,15 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
+const ADMIN_EMAILS = ["24sports.social@gmail.com"];
+
+const loginBtn = document.getElementById("login-btn");
 const loginContainer = document.getElementById("login-container");
 const chatContainer = document.getElementById("chat-container");
-const loginBtn = document.getElementById("login-btn");
 const sendBtn = document.getElementById("send-btn");
 const messageInput = document.getElementById("message-input");
 const chatMessages = document.getElementById("chat-messages");
 
-const ADMIN_EMAILS = ["24sports.social@gmail.com"];
 let currentUser = null;
 
 loginBtn.onclick = () => {
@@ -86,7 +87,7 @@ db.ref("messages").on("value", snapshot => {
     const msgEl = document.createElement("div");
     msgEl.className = `message ${isSent ? "sent" : "received"}`;
     msgEl.innerHTML = `
-      <img src="${msg.photo}" alt="pfp" width="32" height="32" style="border-radius:50%;margin:${isSent ? '0 0 0 8px' : '0 8px 0 0'};">
+      <img src="${msg.photo}" alt="pfp" class="profile">
       <div class="bubble">
         <div class="name">${msg.name}</div>
         <div>${msg.text}</div>
