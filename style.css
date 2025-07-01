@@ -9,9 +9,54 @@ body {
   flex-direction: column;
 }
 
-#login-container {
-  margin: auto;
+.login-popup {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #000;
+  animation: fadeIn 0.5s ease;
+}
+
+.login-card {
+  background: #1f272a;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
   text-align: center;
+  animation: scaleIn 0.4s ease;
+}
+
+.login-card h2 {
+  color: #ee674c;
+  margin-bottom: 20px;
+}
+
+#login-btn {
+  background-color: #134333;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#login-btn:hover {
+  background-color: #176848;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
 #chat-container {
@@ -118,4 +163,21 @@ body {
   z-index: 999;
   padding: 4px 8px;
   display: none;
+}
+
+.profile {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin: 0 8px;
+}
+
+@media (max-width: 768px) {
+  #message-input {
+    font-size: 16px;
+  }
+
+  #chat-input {
+    padding: 8px;
+  }
 }
