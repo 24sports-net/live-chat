@@ -13,15 +13,14 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-const ADMIN_EMAILS = ["24sports.social@gmail.com"];
-
-const loginBtn = document.getElementById("login-btn");
 const loginContainer = document.getElementById("login-container");
 const chatContainer = document.getElementById("chat-container");
+const loginBtn = document.getElementById("login-btn");
 const sendBtn = document.getElementById("send-btn");
 const messageInput = document.getElementById("message-input");
 const chatMessages = document.getElementById("chat-messages");
 
+const ADMIN_EMAILS = ["24sports.social@gmail.com"];
 let currentUser = null;
 
 loginBtn.onclick = () => {
@@ -38,7 +37,7 @@ auth.onAuthStateChanged(user => {
 });
 
 sendBtn.onclick = sendMessage;
-messageInput.addEventListener("keydown", (e) => {
+messageInput.addEventListener("keydown", e => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
     sendMessage();
@@ -49,14 +48,14 @@ function sendMessage() {
   const text = messageInput.value.trim();
   if (!text) return;
 
-  const isLink = /https?:\\/\\//i.test(text);
+  const isLink = /https?:\/\//i.test(text);
   if (isLink && !ADMIN_EMAILS.includes(currentUser.email)) {
     alert("Links are not allowed");
     messageInput.value = "";
     return;
   }
 
-  const msg = {
+  const message = {
     name: currentUser.displayName,
     email: currentUser.email,
     photo: currentUser.photoURL || "https://www.gravatar.com/avatar/?d=mp",
@@ -64,48 +63,51 @@ function sendMessage() {
     timestamp: Date.now()
   };
 
-  db.ref("messages").push(msg);
+  db.ref("messages").push(message);
   messageInput.value = "";
-}
-
-function renderMessage(key, msg) {
-  const isSent = msg.email === currentUser.email;
-  const isAdmin = ADMIN_EMAILS.includes(currentUser.email);
-  const now = Date.now();
-
-  if (now - msg.timestamp > 86400000) {
-    db.ref("messages/" + key).remove();
-    return;
-  }
-
-  const div = document.createElement("div");
-  div.className = `message ${isSent ? "sent" : "received"}`;
-
-  const profile = `<img src="${msg.photo}" class="profile" alt="user">`;
-
-  const deleteOption = isAdmin || currentUser.email === msg.email
-    ? `<div class="options"><button class="delete-btn" onclick="deleteMessage('${key}')">⋮</button></div>`
-    : "";
-
-  div.innerHTML = `
-    ${isSent ? "" : profile}
-    <div class="bubble">
-      <div class="name">${msg.name}</div>
-      <div>${msg.text}</div>
-      <div class="time">${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-      ${deleteOption}
-    </div>
-    ${isSent ? profile : ""}
-  `;
-
-  chatMessages.appendChild(div);
 }
 
 db.ref("messages").on("value", snapshot => {
   chatMessages.innerHTML = "";
-  snapshot.forEach(child => renderMessage(child.key, child.val()));
+  const now = Date.now();
+
+  snapshot.forEach(child => {
+    const msg = child.val();
+    const isSent = msg.email === currentUser.email;
+    const isAdmin = ADMIN_EMAILS.includes(currentUser.email);
+    const isOwner = msg.email === currentUser.email;
+    const age = now - msg.timestamp;
+
+    if (age >= 86400000) {
+      db.ref("messages/" + child.key).remove();
+      return;
+    }
+
+    const msgEl = document.createElement("div");
+    msgEl.className = `message ${isSent ? "sent" : "received"}`;
+    msgEl.innerHTML = `
+      <img src="${msg.photo}" alt="pfp" width="32" height="32" style="border-radius:50%;margin:${isSent ? '0 0 0 8px' : '0 8px 0 0'};">
+      <div class="bubble">
+        <div class="name">${msg.name}</div>
+        <div>${msg.text}</div>
+        <div class="time">${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+        ${(isOwner || isAdmin) ? `
+          <button class="menu-btn" onclick="toggleMenu(this)">⋮</button>
+          <div class="menu">
+            <div onclick="deleteMessage('${child.key}')">Delete</div>
+          </div>` : ""}
+      </div>
+    `;
+    chatMessages.appendChild(msgEl);
+  });
+
   chatMessages.scrollTop = chatMessages.scrollHeight;
 });
+
+function toggleMenu(button) {
+  const menu = button.nextElementSibling;
+  menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
 
 function deleteMessage(key) {
   db.ref("messages/" + key).remove();
