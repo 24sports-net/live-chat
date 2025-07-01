@@ -1,8 +1,13 @@
+/* WhatsApp-style Chat CSS */
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
   background-color: #000;
-  color: white;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 }
 
 #login-container {
@@ -13,95 +18,94 @@ body {
 }
 
 #login-btn {
-  background-color: #1f272a;
-  color: white;
+  padding: 12px 24px;
   border: none;
-  padding: 12px 20px;
+  background-color: #1f272a;
+  color: #fff;
   font-size: 16px;
-  cursor: pointer;
   border-radius: 8px;
+  cursor: pointer;
 }
 
 #chat-container {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  padding: 10px;
-  box-sizing: border-box;
 }
 
 #chat-messages {
   flex: 1;
   overflow-y: auto;
-  padding-bottom: 10px;
+  padding: 16px;
 }
 
 .message {
   display: flex;
-  margin-bottom: 10px;
-  align-items: flex-end;
+  margin-bottom: 12px;
+  max-width: 80%;
 }
 
 .message.sent {
   justify-content: flex-end;
+  align-self: flex-end;
 }
 
 .message.received {
   justify-content: flex-start;
+  align-self: flex-start;
 }
 
 .bubble {
-  max-width: 70%;
-  padding: 10px;
-  border-radius: 12px;
-  font-size: 14px;
+  padding: 12px;
+  border-radius: 18px;
   position: relative;
   white-space: pre-wrap;
+  word-wrap: break-word;
+  font-size: 14px;
+  line-height: 1.4;
 }
 
 .message.sent .bubble {
   background-color: #134333;
-  color: white;
+  color: #fff;
   border-bottom-right-radius: 0;
 }
 
 .message.received .bubble {
   background-color: #1f272a;
-  color: white;
+  color: #fff;
   border-bottom-left-radius: 0;
 }
 
 .name {
-  font-weight: bold;
   color: #ee674c;
+  font-weight: bold;
   margin-bottom: 4px;
 }
 
 .time {
-  font-size: 10px;
+  font-size: 11px;
   text-align: right;
-  opacity: 0.6;
-  margin-top: 4px;
+  color: #ccc;
+  margin-top: 6px;
 }
 
 #chat-input-area {
   display: flex;
-  align-items: center;
-  padding: 8px;
+  padding: 12px;
   background-color: #1f272a;
   border-top: 1px solid #333;
 }
 
 #message-input {
   flex: 1;
-  background: none;
+  background-color: #111;
   border: none;
-  color: white;
+  border-radius: 18px;
+  padding: 10px 14px;
+  color: #fff;
   font-size: 14px;
   resize: none;
-  padding: 8px;
-  border-radius: 8px;
-  outline: none;
   height: 40px;
 }
 
@@ -109,9 +113,19 @@ body {
   background-color: #134333;
   color: white;
   border: none;
-  padding: 10px;
-  margin-left: 8px;
   border-radius: 50%;
-  font-size: 18px;
+  padding: 10px 14px;
+  margin-left: 10px;
   cursor: pointer;
+  font-size: 18px;
+}
+
+@media screen and (max-width: 600px) {
+  .bubble {
+    font-size: 13px;
+  }
+
+  #message-input {
+    font-size: 13px;
+  }
 }
