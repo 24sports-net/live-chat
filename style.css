@@ -1,8 +1,17 @@
 body {
   margin: 0;
+  padding: 0;
   font-family: Arial, sans-serif;
-  background-color: #000;
+  background: #000;
   color: white;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#login-container {
+  margin: auto;
+  text-align: center;
 }
 
 #chat-container {
@@ -23,30 +32,30 @@ body {
 .message {
   display: flex;
   align-items: flex-end;
-  max-width: 80%;
+  max-width: 75%;
 }
 
-.received {
-  flex-direction: row;
+.message.sent {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.message.received {
   align-self: flex-start;
 }
 
-.sent {
-  flex-direction: row-reverse;
-  align-self: flex-end;
-}
-
 .bubble {
-  padding: 10px;
+  background: #1f272a;
+  padding: 10px 15px;
   border-radius: 15px;
-  background-color: #1f272a;
   position: relative;
-  max-width: 100%;
-  word-break: break-word;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
-.sent .bubble {
-  background-color: #134333;
+.message.sent .bubble {
+  background: #134333;
 }
 
 .name {
@@ -56,64 +65,57 @@ body {
 
 .time {
   font-size: 12px;
-  color: gray;
-  text-align: right;
+  color: #aaa;
+  align-self: flex-end;
 }
 
-#chat-input {
+#message-form {
   display: flex;
-  align-items: center;
   padding: 10px;
-  background-color: #1f272a;
+  background: #1f272a;
+  align-items: center;
 }
 
 #message-input {
   flex: 1;
   padding: 10px;
-  border-radius: 20px;
   border: none;
-  outline: none;
-  background-color: #000;
+  border-radius: 25px;
+  margin-right: 10px;
+  background: #111;
   color: white;
+  outline: none;
 }
 
 #send-btn {
-  margin-left: 10px;
-  background-color: #134333;
+  background: #134333;
   border: none;
+  color: white;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  padding: 10px;
+  font-size: 18px;
   cursor: pointer;
 }
 
-.delete-btn {
+.menu-btn {
   background: none;
   border: none;
-  color: red;
-  font-size: 14px;
+  color: white;
   cursor: pointer;
-  margin-top: 4px;
-  text-align: right;
+  font-size: 18px;
+  align-self: flex-end;
 }
 
-.options {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.profile {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  margin: 0 8px;
-}
-
-@media (max-width: 768px) {
-  #message-input {
-    font-size: 16px;
-  }
-
-  #chat-input {
-    padding: 8px;
-  }
+.menu {
+  background: #333;
+  color: white;
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  border-radius: 4px;
+  font-size: 14px;
+  z-index: 999;
+  padding: 4px 8px;
+  display: none;
 }
