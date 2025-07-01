@@ -2,22 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Live Chat</title>
   <link rel="stylesheet" href="style.css" />
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </head>
 <body>
   <div id="login-container">
-    <button id="login-btn">Sign in with Google</button>
+    <button id="login-btn">Login with Google</button>
   </div>
-  <div id="chat-container" style="display:none;">
+  <div id="chat-container" style="display:none">
     <div id="chat-messages"></div>
-    <div id="input-bar">
-      <input id="message-input" placeholder="Type a message..." />
-      <button id="send-btn">➤</button>
+    <div id="chat-input">
+      <input id="message-input" type="text" placeholder="Type a message..." />
+      <button id="send-btn">
+        <svg height="24" width="24" viewBox="0 0 24 24" fill="#fff">
+          <path d="M2 21l21-9L2 3v7l15 2-15 2z"/>
+        </svg>
+      </button>
     </div>
   </div>
   <script src="app.js"></script>
