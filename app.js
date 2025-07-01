@@ -1,4 +1,4 @@
-// Firebase config
+// Initialize Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyD4-VCUGPN1XyQ1Xr-nsygATasnRrukWr4",
   authDomain: "spn-livechat.firebaseapp.com",
@@ -24,17 +24,13 @@ const chatMessages = document.getElementById("chat-messages");
 const ADMIN_EMAILS = ["24sports.social@gmail.com"];
 let currentUser = null;
 
-// Google login
+// Login with Google
 loginBtn.onclick = () => {
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider)
-    .catch(error => {
-      alert("Login error: " + error.message);
-      console.error(error);
-    });
+  auth.signInWithPopup(provider);
 };
 
-// Auth state check
+// On user login
 auth.onAuthStateChanged((user) => {
   if (user) {
     currentUser = user;
@@ -43,7 +39,7 @@ auth.onAuthStateChanged((user) => {
   }
 });
 
-// Send message
+// Send on click or Enter (Shift+Enter for newline)
 sendBtn.onclick = sendMessage;
 messageInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) {
@@ -52,13 +48,14 @@ messageInput.addEventListener("keydown", (e) => {
   }
 });
 
+// Send message function
 function sendMessage() {
   const text = messageInput.value.trim();
   if (!text) return;
 
-  const isLink = /https?:\/\/\S+/i.test(text);
+  const isLink = /https?:\/\//i.test(text);
   if (isLink && !ADMIN_EMAILS.includes(currentUser.email)) {
-    alert("Links are not allowed.");
+    alert("Links are not allowed");
     messageInput.value = "";
     return;
   }
@@ -70,23 +67,20 @@ function sendMessage() {
     text,
     timestamp: Date.now()
   };
-
   db.ref("messages").push(message);
   messageInput.value = "";
 }
 
-// Listen for new messages
+// Display messages
 db.ref("messages").on("value", (snapshot) => {
   chatMessages.innerHTML = "";
   const now = Date.now();
-
   snapshot.forEach((child) => {
     const msg = child.val();
-    const isSent = msg.email === currentUser?.email;
-    const isAdmin = ADMIN_EMAILS.includes(currentUser?.email);
+    const isSent = msg.email === currentUser.email;
+    const isAdmin = ADMIN_EMAILS.includes(currentUser.email);
     const age = now - msg.timestamp;
 
-    // Auto-delete after 24 hours
     if (age >= 86400000) {
       db.ref("messages/" + child.key).remove();
       return;
@@ -95,20 +89,20 @@ db.ref("messages").on("value", (snapshot) => {
     const msgEl = document.createElement("div");
     msgEl.className = `message ${isSent ? "sent" : "received"}`;
     msgEl.innerHTML = `
-      <img src="${msg.photo}" alt="pfp" width="32" height="32" style="border-radius:50%;margin:${isSent ? '0 0 0 8px' : '0 8px 0 0'};align-self:flex-end;">
+      <img src="${msg.photo}" alt="pfp">
       <div class="bubble">
         <div class="name">${msg.name}</div>
-        <div>${msg.text}</div>
+        <div class="text">${msg.text}</div>
         <div class="time">${new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
         ${isAdmin ? `<button onclick="deleteMessage('${child.key}')" style="background:none;border:none;color:red;font-size:12px;cursor:pointer;">Delete</button>` : ""}
       </div>
     `;
     chatMessages.appendChild(msgEl);
   });
-
   chatMessages.scrollTop = chatMessages.scrollHeight;
 });
 
+// Admin delete
 function deleteMessage(key) {
   db.ref("messages/" + key).remove();
 }
