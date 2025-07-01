@@ -1,5 +1,10 @@
-// ✅ Restrict to Blogspot domain only
-if (location.hostname !== "24sports-network.blogspot.com") {
+// ✅ Allow only specific domains
+const allowedHosts = [
+  "24sports-network.blogspot.com",
+  "24sports-net.github.io"
+];
+
+if (!allowedHosts.includes(location.hostname)) {
   location.href = "https://24sports-network.blogspot.com";
 }
 
