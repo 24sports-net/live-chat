@@ -1,111 +1,103 @@
-// ✅ Allow only specific domains
-const allowedHosts = [
-  "24sports-network.blogspot.com",
-  "24sports-net.github.io"
-];
-
-if (!allowedHosts.includes(location.hostname)) {
-  location.href = "https://24sports-network.blogspot.com";
-}
-
-// ✅ Firebase config
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyD4-VCUGPN1XyQ1Xr-nsygATasnRrukWr4",
   authDomain: "spn-livechat.firebaseapp.com",
+  databaseURL: "https://spn-livechat-default-rtdb.firebaseio.com",
   projectId: "spn-livechat",
   storageBucket: "spn-livechat.appspot.com",
   messagingSenderId: "979619554738",
-  appId: "1:979619554738:web:a36c0a793988913d5670ab"
+  appId: "1:979619554738:web:a36c0a793988913d5670ab",
+  measurementId: "G-8D9XXZSCR9"
 };
 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// ✅ DOM references
-const loginBtn = document.getElementById('login-btn');
-const chatContainer = document.getElementById('chat-container');
-const loginContainer = document.getElementById('login-container');
-const sendBtn = document.getElementById('send-btn');
-const messageInput = document.getElementById('message-input');
-const chatMessages = document.getElementById('chat-messages');
+const loginContainer = document.getElementById("login-container");
+const chatContainer = document.getElementById("chat-container");
+const loginBtn = document.getElementById("login-btn");
+const sendBtn = document.getElementById("send-btn");
+const messageInput = document.getElementById("message-input");
+const chatMessages = document.getElementById("chat-messages");
 
-// ✅ Admin list
-const admins = ["24sports.social@gmail.com"];
+const ADMIN_EMAILS = ["24sports.social@gmail.com"];
+
 let currentUser = null;
 
-// ✅ Login with Google
-loginBtn.addEventListener('click', () => {
+loginBtn.onclick = () => {
   const provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider);
-});
+};
 
-// ✅ Monitor login status
-auth.onAuthStateChanged(user => {
+auth.onAuthStateChanged((user) => {
   if (user) {
     currentUser = user;
-    loginContainer.style.display = 'none';
-    chatContainer.style.display = 'flex';
-    listenMessages();
+    loginContainer.style.display = "none";
+    chatContainer.style.display = "flex";
   }
 });
 
-// ✅ Message send events
-sendBtn.addEventListener('click', sendMessage);
-messageInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) {
+sendBtn.onclick = sendMessage;
+messageInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
     sendMessage();
   }
 });
 
-// ✅ Send message logic
 function sendMessage() {
   const text = messageInput.value.trim();
   if (!text) return;
 
-  const isLink = /(https?:\/\/|www\.)\S+/i.test(text);
-  if (isLink && !admins.includes(currentUser.email)) {
-    alert("Links are not allowed.");
+  const isLink = /https?:\\/\\//i.test(text);
+  if (isLink && !ADMIN_EMAILS.includes(currentUser.email)) {
+    alert("Links are not allowed");
+    messageInput.value = "";
     return;
   }
 
-  const now = new Date();
-  const msg = {
-    uid: currentUser.uid,
+  const message = {
     name: currentUser.displayName,
-    photo: currentUser.photoURL || '',
-    text: text,
-    time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    timestamp: now.getTime()
+    email: currentUser.email,
+    photo: currentUser.photoURL || "https://www.gravatar.com/avatar/?d=mp",
+    text,
+    timestamp: Date.now()
   };
-
-  db.ref('messages').push(msg);
-  messageInput.value = '';
+  db.ref("messages").push(message);
+  messageInput.value = "";
 }
 
-// ✅ Load and display messages
-function listenMessages() {
-  db.ref('messages').on('value', snapshot => {
-    chatMessages.innerHTML = '';
-    snapshot.forEach(child => {
-      const msg = child.val();
-      if (Date.now() - msg.timestamp > 86400000) return; // hide old msgs >24h
+db.ref("messages").on("value", (snapshot) => {
+  chatMessages.innerHTML = "";
+  const now = Date.now();
+  snapshot.forEach((child) => {
+    const msg = child.val();
+    const isSent = msg.email === currentUser.email;
+    const isAdmin = ADMIN_EMAILS.includes(currentUser.email);
+    const age = now - msg.timestamp;
 
-      const div = document.createElement('div');
-      div.className = 'message ' + (msg.uid === currentUser.uid ? 'sent' : 'received');
+    if (age >= 86400000) {
+      db.ref("messages/" + child.key).remove();
+      return;
+    }
 
-      const bubble = document.createElement('div');
-      bubble.className = 'bubble';
-      bubble.innerHTML = `
+    const msgEl = document.createElement("div");
+    msgEl.className = `message ${isSent ? "sent" : "received"}`;
+    msgEl.innerHTML = `
+      <img src="${msg.photo}" alt="pfp" width="32" height="32" style="border-radius:50%;margin:${isSent ? '0 0 0 8px' : '0 8px 0 0'};align-self:flex-end;">
+      <div class="bubble">
         <div class="name">${msg.name}</div>
-        ${msg.text}
-        <div class="time">${msg.time}</div>
-      `;
-
-      div.appendChild(bubble);
-      chatMessages.appendChild(div);
-    });
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+        <div>${msg.text}</div>
+        <div class="time">${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+        ${isAdmin ? `<button onclick="deleteMessage('${child.key}')" style="background:none;border:none;color:red;font-size:12px;cursor:pointer;">Delete</button>` : ""}
+      </div>
+    `;
+    chatMessages.appendChild(msgEl);
   });
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+});
+
+function deleteMessage(key) {
+  db.ref("messages/" + key).remove();
 }
