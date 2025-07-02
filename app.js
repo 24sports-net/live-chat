@@ -134,7 +134,7 @@ db.ref("messages").on("value", (snapshot) => {
     msgEl.innerHTML = `
       <img src="${msg.photo}" alt="pfp" class="profile">
       <div class="bubble">
-        <div class="name" style="color:${msgColor};">${nameWithAdmin}</div>
+        <div class="name" style="color:${msgColor}; font-weight:bold;">${nameWithAdmin}</div>
         ${replyHTML}
         <div>${safeText}</div>
         <div class="time">${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
