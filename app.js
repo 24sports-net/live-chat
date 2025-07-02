@@ -137,7 +137,7 @@ db.ref("messages").on("value", (snapshot) => {
 
     const nameWithIcon = `
       <span style="color:${msgColor};">${msg.name}</span>
-      ${isSenderAdmin ? '<span class="material-icons" style="font-size:14px;color:#FF4C4C;vertical-align:middle;">verified</span>' : ''}
+      ${isSenderAdmin ? '<span class="material-icons" style="font-size:14px;color:#1D9BF0;vertical-align:middle;">verified</span>' : ''}
     `;
 
     const safeText = msg.text.replace(/(@\w+)/g, `<span style="color:#00A884;">$1</span>`);
