@@ -72,6 +72,9 @@ body {
   font-size: 13px;
   margin-bottom: 4px;
   font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .time {
@@ -88,7 +91,6 @@ body {
   background: #111;
   position: sticky;
   bottom: 0;
-  border-top: 2px solid red;
 }
 
 #message-input {
@@ -97,7 +99,7 @@ body {
   padding: 10px 14px;
   resize: none;
   font-size: 14px;
-  border: 2px solid red;
+  border: 2px solid red; /* ✅ Red border only around input */
   outline: none;
   margin-right: 10px;
   background: #1f1f1f;
