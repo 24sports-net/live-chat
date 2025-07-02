@@ -3,28 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SPN Live Chat</title>
+  <title>Live Chat</title>
+  <link rel="stylesheet" href="style.css"/>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
   <div id="login-container">
     <button id="login-btn">Sign in with Google</button>
   </div>
 
-  <div id="chat-container">
+  <div id="chat-container" style="display:none;">
     <div id="chat-messages"></div>
-    <div id="reply-box" style="display:none;"></div>
     <div id="typing-indicator"></div>
-    <div id="input-container">
-      <textarea id="message-input" placeholder="Type a message..."></textarea>
-      <button id="send-btn"><span class="material-icons">send</span></button>
+    <div id="reply-box" style="display:none;"></div>
+    <div id="input-bar">
+      <textarea id="message-input" placeholder="Type a message"></textarea>
+      <button id="send-btn">
+        <span class="material-icons">send</span>
+      </button>
     </div>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
