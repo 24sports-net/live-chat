@@ -5,8 +5,7 @@ const firebaseConfig = {
   projectId: "spn-livechat",
   storageBucket: "spn-livechat.appspot.com",
   messagingSenderId: "979619554738",
-  appId: "1:979619554738:web:a36c0a793988913d5670ab",
-  measurementId: "G-8D9XXZSCR9"
+  appId: "1:979619554738:web:a36c0a793988913d5670ab"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -30,7 +29,16 @@ let typingTimeout = null;
 
 loginBtn.onclick = () => {
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider);
+  auth.signInWithPopup(provider)
+    .then((result) => {
+      currentUser = result.user;
+      loginContainer.style.display = "none";
+      chatContainer.style.display = "flex";
+    })
+    .catch((error) => {
+      console.error("Login error:", error);
+      alert("Google Sign-In failed: " + error.message);
+    });
 };
 
 auth.onAuthStateChanged((user) => {
@@ -38,10 +46,14 @@ auth.onAuthStateChanged((user) => {
     currentUser = user;
     loginContainer.style.display = "none";
     chatContainer.style.display = "flex";
+  } else {
+    loginContainer.style.display = "block";
+    chatContainer.style.display = "none";
   }
 });
 
 sendBtn.onclick = sendMessage;
+
 messageInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
@@ -135,4 +147,53 @@ db.ref("messages").on("value", (snapshot) => {
         <b style="color:${assignColor(msg.reply.name, msg.reply.email || "")};">${msg.reply.name}</b>: ${msg.reply.text}
       </div>` : "";
 
-    msgE
+    msgEl.innerHTML = `
+      <img src="${msg.photo}" alt="pfp" class="profile">
+      <div class="bubble">
+        <div class="name">${nameWithIcon}</div>
+        ${replyHTML}
+        <div>${safeText}</div>
+        <div class="time">${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+        ${
+          isAdmin ? `
+            <button class="trash-btn" onclick="confirmDelete('${child.key}')">
+              <span class="material-icons">delete</span>
+            </button>` : ""
+        }
+      </div>
+    `;
+
+    msgEl.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      replyTo = {
+        name: msg.name,
+        text: msg.text,
+        email: msg.email
+      };
+      document.getElementById("reply-box").innerHTML = `
+        <div style="background:#1f272a;padding:6px 10px;border-left:3px solid #25D366;color:#ccc;">
+          Replying to <b style="color:${msgColor};">${msg.name}</b>: ${msg.text}
+          <span style="float:right;cursor:pointer;" onclick="cancelReply()">×</span>
+        </div>`;
+      document.getElementById("reply-box").style.display = "block";
+    });
+
+    chatMessages.appendChild(msgEl);
+  });
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+});
+
+function cancelReply() {
+  replyTo = null;
+  document.getElementById("reply-box").style.display = "none";
+}
+
+function confirmDelete(key) {
+  if (confirm("Are you sure you want to delete this message?")) {
+    deleteMessage(key);
+  }
+}
+
+function deleteMessage(key) {
+  db.ref("messages/" + key).remove();
+}
