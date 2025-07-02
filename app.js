@@ -1,4 +1,3 @@
-// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyD4-VCUGPN1XyQ1Xr-nsygATasnRrukWr4",
   authDomain: "spn-livechat.firebaseapp.com",
@@ -23,7 +22,7 @@ const chatMessages = document.getElementById("chat-messages");
 const typingIndicator = document.getElementById("typing-indicator");
 
 const ADMIN_EMAILS = ["24sports.social@gmail.com"];
-const NAME_COLORS = ["#7F66FF", "#00C2D1", "#34B7F1", "#25D366", "#FF4C4C", "#C4F800", "#FFD279", "#FF5C9D", "#53BDEB", "#A259FF", "#FF8A3D"];
+const NAME_COLORS = ["#7F66FF", "#00C2D1", "#34B7F1", "#25D366", "#C4F800", "#FFD279", "#FF5C9D", "#53BDEB", "#A259FF", "#FF8A3D"];
 
 let currentUser = null;
 let replyTo = null;
@@ -61,7 +60,8 @@ messageInput.addEventListener("input", () => {
   }, 2000);
 });
 
-function assignColor(name) {
+function assignColor(name, email) {
+  if (ADMIN_EMAILS.includes(email)) return "#FF4C4C";
   const hash = name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return NAME_COLORS[hash % NAME_COLORS.length];
 }
@@ -119,64 +119,20 @@ db.ref("messages").on("value", (snapshot) => {
       return;
     }
 
-    const msgColor = assignColor(msg.name);
+    const msgColor = assignColor(msg.name, msg.email);
     const msgEl = document.createElement("div");
     msgEl.className = `message ${isSent ? "sent" : "received"}`;
 
-    const nameWithAdmin = `${msg.name}${isSenderAdmin ? " (ADMIN)" : ""}`;
+    const nameWithIcon = `
+      <span style="color:${msgColor};">${msg.name}</span>
+      ${isSenderAdmin ? '<span class="material-icons" style="font-size:14px;color:#FF4C4C;vertical-align:middle;">verified</span>' : ''}
+    `;
+
     const safeText = msg.text.replace(/(@\w+)/g, `<span style="color:#00A884;">$1</span>`);
 
     const replyHTML = msg.reply ? `
       <div style="border-left: 3px solid #25D366; padding-left: 8px; margin-bottom: 5px; font-size: 13px; color: #ccc;">
-        <b style="color:${assignColor(msg.reply.name)};">${msg.reply.name}</b>: ${msg.reply.text}
+        <b style="color:${assignColor(msg.reply.name, msg.reply.email || "")};">${msg.reply.name}</b>: ${msg.reply.text}
       </div>` : "";
 
-    msgEl.innerHTML = `
-      <img src="${msg.photo}" alt="pfp" class="profile">
-      <div class="bubble">
-        <div class="name" style="color:${msgColor};">${nameWithAdmin}</div>
-        ${replyHTML}
-        <div>${safeText}</div>
-        <div class="time">${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-        ${
-          isAdmin ? `
-            <button class="trash-btn" onclick="confirmDelete('${child.key}')">
-              <span class="material-icons">delete</span>
-            </button>` : ""
-        }
-      </div>
-    `;
-
-    msgEl.addEventListener("contextmenu", (e) => {
-      e.preventDefault();
-      replyTo = {
-        name: msg.name,
-        text: msg.text
-      };
-      document.getElementById("reply-box").innerHTML = `
-        <div style="background:#1f272a;padding:6px 10px;border-left:3px solid #25D366;color:#ccc;">
-          Replying to <b style="color:${assignColor(msg.name)};">${msg.name}</b>: ${msg.text}
-          <span style="float:right;cursor:pointer;" onclick="cancelReply()">×</span>
-        </div>`;
-      document.getElementById("reply-box").style.display = "block";
-    });
-
-    chatMessages.appendChild(msgEl);
-  });
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-});
-
-function cancelReply() {
-  replyTo = null;
-  document.getElementById("reply-box").style.display = "none";
-}
-
-function confirmDelete(key) {
-  if (confirm("Are you sure you want to delete this message?")) {
-    deleteMessage(key);
-  }
-}
-
-function deleteMessage(key) {
-  db.ref("messages/" + key).remove();
-}
+    msgE
