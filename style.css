@@ -1,0 +1,137 @@
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background: #000;
+  color: white;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#login-container {
+  text-align: center;
+}
+
+#login-btn {
+  padding: 12px 24px;
+  font-size: 16px;
+  background: #25D366;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  max-width: 600px;
+  background-color: #000;
+}
+
+#chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.message {
+  display: flex;
+  margin-bottom: 12px;
+}
+
+.message.sent {
+  flex-direction: row-reverse;
+}
+
+.message .profile {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin: 0 8px;
+  align-self: flex-start;
+}
+
+.bubble {
+  max-width: 75%;
+  padding: 10px;
+  border-radius: 10px;
+  position: relative;
+  background: #1f272a;
+  color: white;
+}
+
+.sent .bubble {
+  background: #134333;
+}
+
+.name {
+  font-size: 13px;
+  margin-bottom: 4px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.time {
+  font-size: 10px;
+  color: #ccc;
+  margin-top: 5px;
+  text-align: right;
+}
+
+#input-bar {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background: #111;
+  position: sticky;
+  bottom: 0;
+}
+
+#message-input {
+  flex: 1;
+  border-radius: 20px;
+  padding: 10px 14px;
+  resize: none;
+  font-size: 14px;
+  border: 2px solid red; /* ✅ Red border only around input */
+  outline: none;
+  margin-right: 10px;
+  background: #1f1f1f;
+  color: white;
+}
+
+#send-btn {
+  border: none;
+  background: #25D366;
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.material-icons {
+  font-size: 18px;
+  vertical-align: middle;
+  color: white;
+}
+
+.trash-btn {
+  background: none;
+  border: none;
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  cursor: pointer;
+}
+
+#reply-box {
+  padding: 8px;
+  font-size: 13px;
+  background: #121212;
+  border-left: 3px solid #25D366;
+}
