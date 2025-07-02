@@ -1,4 +1,4 @@
-// Firebase Configuration
+// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyD4-VCUGPN1XyQ1Xr-nsygATasnRrukWr4",
   authDomain: "spn-livechat.firebaseapp.com",
@@ -70,7 +70,7 @@ function sendMessage() {
   const text = messageInput.value.trim();
   if (!text) return;
 
-  const isLink = /https?:\\/\\//i.test(text);
+  const isLink = /https?:\/\/|www\./i.test(text);
   if (isLink && !ADMIN_EMAILS.includes(currentUser.email)) {
     alert("Links are not allowed");
     messageInput.value = "";
@@ -111,21 +111,21 @@ db.ref("messages").on("value", (snapshot) => {
     const msg = child.val();
     const isSent = msg.email === currentUser.email;
     const isAdmin = ADMIN_EMAILS.includes(currentUser.email);
+    const isSenderAdmin = ADMIN_EMAILS.includes(msg.email);
     const age = now - msg.timestamp;
-    const msgColor = assignColor(msg.name);
 
     if (age >= 86400000) {
       db.ref("messages/" + child.key).remove();
       return;
     }
 
+    const msgColor = assignColor(msg.name);
     const msgEl = document.createElement("div");
     msgEl.className = `message ${isSent ? "sent" : "received"}`;
 
-    const isAdminLabel = ADMIN_EMAILS.includes(msg.email) ? " (ADMIN)" : "";
-    const nameWithAdmin = `${msg.name}${isAdminLabel}`;
+    const nameWithAdmin = `${msg.name}${isSenderAdmin ? " (ADMIN)" : ""}`;
+    const safeText = msg.text.replace(/(@\w+)/g, `<span style="color:#00A884;">$1</span>`);
 
-    const safeText = msg.text.replace(/(@\\w+)/g, `<span style="color:#00A884;">$1</span>`);
     const replyHTML = msg.reply ? `
       <div style="border-left: 3px solid #25D366; padding-left: 8px; margin-bottom: 5px; font-size: 13px; color: #ccc;">
         <b style="color:${assignColor(msg.reply.name)};">${msg.reply.name}</b>: ${msg.reply.text}
@@ -134,12 +134,12 @@ db.ref("messages").on("value", (snapshot) => {
     msgEl.innerHTML = `
       <img src="${msg.photo}" alt="pfp" class="profile">
       <div class="bubble">
-        <div class="name" style="color:${msgColor}; font-weight:bold;">${nameWithAdmin}</div>
+        <div class="name" style="color:${msgColor};">${nameWithAdmin}</div>
         ${replyHTML}
         <div>${safeText}</div>
         <div class="time">${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
         ${
-          isAdmin || isSent ? `
+          isAdmin ? `
             <button class="trash-btn" onclick="confirmDelete('${child.key}')">
               <span class="material-icons">delete</span>
             </button>` : ""
