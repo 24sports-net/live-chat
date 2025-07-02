@@ -2,32 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Live Chat</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SPN Live Chat</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="login-container" class="login-popup">
-    <div class="login-card">
-      <h2>Welcome to SPN Chat</h2>
-      <button id="login-btn">
-        <img src="https://img.icons8.com/color/16/000000/google-logo.png" />
-        Sign in with Google
-      </button>
-    </div>
+  <div id="login-container">
+    <button id="login-btn">Sign in with Google</button>
   </div>
 
-  <div id="chat-container" style="display: none;">
+  <div id="chat-container">
     <div id="chat-messages"></div>
-    <div id="message-form">
-      <input type="text" id="message-input" placeholder="Type a message..." />
-      <button id="send-btn">&#9658;</button>
+    <div id="reply-box" style="display:none;"></div>
+    <div id="typing-indicator"></div>
+    <div id="input-container">
+      <textarea id="message-input" placeholder="Type a message..."></textarea>
+      <button id="send-btn"><span class="material-icons">send</span></button>
     </div>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
