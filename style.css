@@ -30,6 +30,7 @@ body {
   display: none;
   flex-direction: column;
   height: 100vh;
+  overflow: hidden;
 }
 
 #chat-messages {
@@ -38,22 +39,23 @@ body {
   padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .message {
   display: flex;
-  max-width: 80%;
-  padding: 10px;
+  align-items: flex-start;
+  max-width: 85%;
   border-radius: 10px;
   position: relative;
-  align-items: flex-start;
   word-break: break-word;
+  padding: 10px;
 }
 
 .sent {
   align-self: flex-end;
   background: #134333;
+  flex-direction: row-reverse;
 }
 
 .received {
@@ -64,17 +66,27 @@ body {
 .bubble {
   display: flex;
   flex-direction: column;
+  max-width: 100%;
 }
 
 .name {
   font-weight: bold;
   margin-bottom: 4px;
+  font-size: 14px;
 }
 
 .time {
-  font-size: 0.7em;
+  font-size: 11px;
   color: #ccc;
   margin-top: 4px;
+  align-self: flex-end;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin: 0 8px;
 }
 
 .material-icons {
@@ -112,19 +124,13 @@ body {
   color: white;
 }
 
-.avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  margin-right: 8px;
-}
-
 .delete-icon {
   position: absolute;
-  top: 4px;
+  top: 6px;
   right: 6px;
   color: red;
   cursor: pointer;
+  font-size: 16px;
 }
 
 #typing-indicator {
