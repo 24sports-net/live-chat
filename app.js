@@ -25,7 +25,7 @@ const chatMessages = document.getElementById("chat-messages");
 const typingIndicator = document.getElementById("typing-indicator");
 
 const ADMIN_EMAILS = ["24sports.social@gmail.com"];
-const NAME_COLORS = ["#7F66FF", "#00C2D1", "#34B7F1", "#25D366", "#FF4C4C", "#C4F800", "#FFD279", "#FF5C9D", "#53BDEB", "#A259FF", "#FF8A3D"];
+const NAME_COLORS = ["#7F66FF", "#00C2D1", "#34B7F1", "#25D366", "#C4F800", "#FFD279", "#FF5C9D", "#53BDEB", "#A259FF", "#FF8A3D"];
 
 let currentUser = null;
 let currentColor = null;
@@ -110,20 +110,20 @@ function listenForMessages() {
       }
 
       const isSender = currentUser.email === msg.email;
-      const isSenderAdmin = ADMIN_EMAILS.includes(msg.email);
+      const isAdmin = ADMIN_EMAILS.includes(msg.email);
       const msgEl = document.createElement("div");
       msgEl.className = `message ${isSender ? "sent" : "received"}`;
       msgEl.innerHTML = `
         <img class="avatar" src="${msg.photo}" />
         <div class="bubble">
-          <div class="name" style="color:${isSenderAdmin ? "#FF4C4C" : msg.color || "#fff"}">
+          <div class="name" style="color:${isAdmin ? "#FF4C4C" : msg.color || "#fff"}">
             ${msg.name}
-            ${isSenderAdmin ? '<span class="material-icons" style="font-size:14px;color:#1D9BF0;vertical-align:middle;">verified</span>' : ""}
+            ${isAdmin ? '<span class="material-icons" style="font-size:14px;color:#1D9BF0;vertical-align:middle;">verified</span>' : ""}
           </div>
           <div>${msg.text}</div>
           <div class="time">${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
         </div>
-        ${(isSenderAdmin && currentUser.email === msg.email) ? `<span class="material-icons delete-icon" onclick="deleteMessage('${child.key}')">delete</span>` : ""}
+        ${isSender && isAdmin ? `<span class="material-icons delete-icon" onclick="deleteMessage('${child.key}')">delete</span>` : ""}
       `;
       chatMessages.appendChild(msgEl);
     });
