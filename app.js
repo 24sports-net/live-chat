@@ -1,3 +1,4 @@
+// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyD4-VCUGPN1XyQ1Xr-nsygATasnRrukWr4",
   authDomain: "spn-livechat.firebaseapp.com",
@@ -12,9 +13,12 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
+// DOM Elements
 const loginContainer = document.getElementById("login-container");
 const chatContainer = document.getElementById("chat-container");
 const loginBtn = document.getElementById("login-btn");
+const guestBtn = document.getElementById("guest-btn");
+const guestName = document.getElementById("guest-name");
 const sendBtn = document.getElementById("send-btn");
 const messageInput = document.getElementById("message-input");
 const chatMessages = document.getElementById("chat-messages");
@@ -24,176 +28,124 @@ const ADMIN_EMAILS = ["24sports.social@gmail.com"];
 const NAME_COLORS = ["#7F66FF", "#00C2D1", "#34B7F1", "#25D366", "#C4F800", "#FFD279", "#FF5C9D", "#53BDEB", "#A259FF", "#FF8A3D"];
 
 let currentUser = null;
-let replyTo = null;
-let typingTimeout = null;
+let currentColor = null;
+let typingTimeout;
 
+// Google Sign In
 loginBtn.onclick = () => {
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider)
-    .then((result) => {
-      currentUser = result.user;
-      loginContainer.style.display = "none";
-      chatContainer.style.display = "flex";
-    })
-    .catch((error) => {
-      console.error("Login error:", error);
-      alert("Google Sign-In failed: " + error.message);
-    });
+  auth.signInWithPopup(provider);
 };
 
+// Guest Login
+guestBtn.onclick = () => {
+  const name = guestName.value.trim();
+  if (!name) return alert("Please enter a nickname.");
+  currentUser = {
+    displayName: name,
+    email: null,
+    photoURL: null
+  };
+  currentColor = NAME_COLORS[Math.floor(Math.random() * NAME_COLORS.length)];
+  loginContainer.style.display = "none";
+  chatContainer.style.display = "flex";
+  listenForMessages();
+};
+
+// Google Auth Listener
 auth.onAuthStateChanged((user) => {
   if (user) {
     currentUser = user;
+    currentColor = ADMIN_EMAILS.includes(user.email) ? "#FF4C4C" : NAME_COLORS[Math.floor(Math.random() * NAME_COLORS.length)];
     loginContainer.style.display = "none";
     chatContainer.style.display = "flex";
-  } else {
-    loginContainer.style.display = "block";
-    chatContainer.style.display = "none";
+    listenForMessages();
   }
 });
 
+// Send message
 sendBtn.onclick = sendMessage;
-
 messageInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
     sendMessage();
   }
+  sendTyping();
 });
-
-messageInput.addEventListener("input", () => {
-  db.ref("typing/" + currentUser.uid).set({
-    name: currentUser.displayName,
-    timestamp: Date.now()
-  });
-  clearTimeout(typingTimeout);
-  typingTimeout = setTimeout(() => {
-    db.ref("typing/" + currentUser.uid).remove();
-  }, 2000);
-});
-
-function assignColor(name, email) {
-  if (ADMIN_EMAILS.includes(email)) return "#FF4C4C";
-  const hash = name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return NAME_COLORS[hash % NAME_COLORS.length];
-}
 
 function sendMessage() {
   const text = messageInput.value.trim();
   if (!text) return;
 
-  const isLink = /https?:\/\/|www\./i.test(text);
-  if (isLink && !ADMIN_EMAILS.includes(currentUser.email)) {
-    alert("Links are not allowed");
+  const isLink = /https?:\/\//i.test(text);
+  if (isLink && (!currentUser.email || !ADMIN_EMAILS.includes(currentUser.email))) {
+    alert("Links are not allowed.");
     messageInput.value = "";
     return;
   }
 
   const message = {
     name: currentUser.displayName,
-    email: currentUser.email,
+    email: currentUser.email || null,
     photo: currentUser.photoURL || "https://www.gravatar.com/avatar/?d=mp",
+    color: currentColor,
     text,
-    timestamp: Date.now(),
-    reply: replyTo || null
+    timestamp: Date.now()
   };
 
   db.ref("messages").push(message);
+  db.ref("typing").set(null);
   messageInput.value = "";
-  replyTo = null;
-  document.getElementById("reply-box").style.display = "none";
 }
 
-db.ref("typing").on("value", (snapshot) => {
-  let isTyping = false;
-  snapshot.forEach(child => {
-    const typer = child.val();
-    if (child.key !== currentUser.uid) {
-      isTyping = true;
-      typingIndicator.textContent = `${typer.name} is typing...`;
-    }
-  });
-  if (!isTyping) typingIndicator.textContent = "";
-});
+function listenForMessages() {
+  db.ref("messages").on("value", (snapshot) => {
+    chatMessages.innerHTML = "";
+    const now = Date.now();
+    snapshot.forEach((child) => {
+      const msg = child.val();
+      if (now - msg.timestamp >= 86400000) {
+        db.ref("messages/" + child.key).remove();
+        return;
+      }
 
-db.ref("messages").on("value", (snapshot) => {
-  chatMessages.innerHTML = "";
-  const now = Date.now();
-  snapshot.forEach((child) => {
-    const msg = child.val();
-    const isSent = msg.email === currentUser.email;
-    const isAdmin = ADMIN_EMAILS.includes(currentUser.email);
-    const isSenderAdmin = ADMIN_EMAILS.includes(msg.email);
-    const age = now - msg.timestamp;
-
-    if (age >= 86400000) {
-      db.ref("messages/" + child.key).remove();
-      return;
-    }
-
-    const msgColor = assignColor(msg.name, msg.email);
-    const msgEl = document.createElement("div");
-    msgEl.className = `message ${isSent ? "sent" : "received"}`;
-
-    const nameWithIcon = `
-      <span style="color:${msgColor};">${msg.name}</span>
-      ${isSenderAdmin ? '<span class="material-icons" style="font-size:14px;color:#1D9BF0;vertical-align:middle;">verified</span>' : ''}
-    `;
-
-    const safeText = msg.text.replace(/(@\w+)/g, `<span style="color:#00A884;">$1</span>`);
-
-    const replyHTML = msg.reply ? `
-      <div style="border-left: 3px solid #25D366; padding-left: 8px; margin-bottom: 5px; font-size: 13px; color: #ccc;">
-        <b style="color:${assignColor(msg.reply.name, msg.reply.email || "")};">${msg.reply.name}</b>: ${msg.reply.text}
-      </div>` : "";
-
-    msgEl.innerHTML = `
-      <img src="${msg.photo}" alt="pfp" class="profile">
-      <div class="bubble">
-        <div class="name">${nameWithIcon}</div>
-        ${replyHTML}
-        <div>${safeText}</div>
-        <div class="time">${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-        ${
-          isAdmin ? `
-            <button class="trash-btn" onclick="confirmDelete('${child.key}')">
-              <span class="material-icons">delete</span>
-            </button>` : ""
-        }
-      </div>
-    `;
-
-    msgEl.addEventListener("contextmenu", (e) => {
-      e.preventDefault();
-      replyTo = {
-        name: msg.name,
-        text: msg.text,
-        email: msg.email
-      };
-      document.getElementById("reply-box").innerHTML = `
-        <div style="background:#1f272a;padding:6px 10px;border-left:3px solid #25D366;color:#ccc;">
-          Replying to <b style="color:${msgColor};">${msg.name}</b>: ${msg.text}
-          <span style="float:right;cursor:pointer;" onclick="cancelReply()">×</span>
-        </div>`;
-      document.getElementById("reply-box").style.display = "block";
+      const isSender = currentUser.email === msg.email;
+      const isAdmin = ADMIN_EMAILS.includes(msg.email);
+      const msgEl = document.createElement("div");
+      msgEl.className = `message ${isSender ? "sent" : "received"}`;
+      msgEl.innerHTML = `
+        <img class="avatar" src="${msg.photo}" />
+        <div class="bubble">
+          <div class="name" style="color:${isAdmin ? "#FF4C4C" : msg.color || "#fff"}">
+            ${msg.name}
+            ${isAdmin ? '<span class="material-icons" style="font-size:14px;color:#1D9BF0;vertical-align:middle;">verified</span>' : ""}
+          </div>
+          <div>${msg.text}</div>
+          <div class="time">${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+        </div>
+        ${isSender && isAdmin ? `<span class="material-icons delete-icon" onclick="deleteMessage('${child.key}')">delete</span>` : ""}
+      `;
+      chatMessages.appendChild(msgEl);
     });
-
-    chatMessages.appendChild(msgEl);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
   });
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-});
 
-function cancelReply() {
-  replyTo = null;
-  document.getElementById("reply-box").style.display = "none";
-}
-
-function confirmDelete(key) {
-  if (confirm("Are you sure you want to delete this message?")) {
-    deleteMessage(key);
-  }
+  db.ref("typing").on("value", (snap) => {
+    const name = snap.val();
+    typingIndicator.innerText = name && name !== currentUser.displayName ? `${name} is typing...` : "";
+  });
 }
 
 function deleteMessage(key) {
-  db.ref("messages/" + key).remove();
+  if (confirm("Are you sure you want to delete this message?")) {
+    db.ref("messages/" + key).remove();
+  }
+}
+
+function sendTyping() {
+  db.ref("typing").set(currentUser.displayName);
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => {
+    db.ref("typing").set(null);
+  }, 2000);
 }
