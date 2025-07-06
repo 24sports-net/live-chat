@@ -14,14 +14,6 @@ body {
   gap: 10px;
 }
 
-#login-container input,
-#login-container button {
-  padding: 10px;
-  font-size: 16px;
-  border-radius: 8px;
-  border: none;
-}
-
 #chat-container {
   display: flex;
   flex-direction: column;
@@ -64,9 +56,9 @@ body {
   background-color: #1f272a;
   border-radius: 12px;
   padding: 10px;
-  max-width: 100%;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .sent .bubble {
@@ -99,6 +91,7 @@ body {
   border: 2px solid red;
   background: #000;
   color: white;
+  outline: none;
 }
 
 #send-btn {
@@ -113,7 +106,7 @@ body {
 
 .delete-icon {
   position: absolute;
-  top: 6px;
+  top: 4px;
   right: 6px;
   font-size: 18px;
   color: red;
