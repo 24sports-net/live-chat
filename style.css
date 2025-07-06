@@ -1,6 +1,6 @@
 body {
   margin: 0;
-  font-family: sans-serif;
+  font-family: 'Segoe UI', sans-serif;
   background: #000;
   color: #fff;
   height: 100vh;
@@ -26,16 +26,16 @@ body {
 #chat-messages {
   flex: 1;
   overflow-y: auto;
-  padding: 10px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .message {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 10px;
 }
 
 .message.sent {
@@ -43,19 +43,21 @@ body {
 }
 
 .profile-img {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   margin-top: 4px;
 }
 
 .bubble {
   background: #1f272a;
-  padding: 10px;
-  border-radius: 8px;
-  max-width: 80%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  max-width: 75%;
   word-wrap: break-word;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .message.sent .bubble {
@@ -64,7 +66,8 @@ body {
 
 .name {
   font-weight: bold;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
+  font-size: 14px;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -86,12 +89,12 @@ body {
   display: flex;
   align-items: center;
   padding: 10px;
-  border-top: 1px solid #222;
   background: #000;
   position: sticky;
   bottom: 0;
   gap: 8px;
-  border: 2px solid red; /* red outline around message input */
+  border-top: 1px solid #222;
+  border: 2px solid red; /* red outline around input area only */
 }
 
 #message-input {
@@ -102,6 +105,8 @@ body {
   border: none;
   outline: none;
   font-size: 14px;
+  background: #1f1f1f;
+  color: #fff;
 }
 
 #send-btn {
@@ -121,8 +126,8 @@ body {
   color: red;
   cursor: pointer;
   font-size: 18px;
-  margin: 0 4px;
-  align-self: center;
+  align-self: flex-start;
+  margin-top: 4px;
 }
 
 #typing-indicator {
@@ -135,7 +140,7 @@ body {
 #reply-box {
   display: none;
   background: #1f272a;
-  padding: 5px 10px;
+  padding: 6px 12px;
   color: #00A884;
   font-size: 13px;
   display: flex;
@@ -145,6 +150,9 @@ body {
 
 #reply-text {
   flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 #cancel-reply {
