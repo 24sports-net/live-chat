@@ -1,7 +1,7 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: #000;
+  background-color: #000;
   color: white;
 }
 
@@ -18,19 +18,14 @@ body {
 #login-container button {
   padding: 10px;
   font-size: 16px;
-  border: none;
   border-radius: 8px;
-}
-
-#guest-name {
-  width: 200px;
+  border: none;
 }
 
 #chat-container {
-  display: none;
+  display: flex;
   flex-direction: column;
   height: 100vh;
-  overflow: hidden;
 }
 
 #chat-messages {
@@ -39,40 +34,48 @@ body {
   padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 15px;
 }
 
 .message {
   display: flex;
   align-items: flex-start;
-  max-width: 85%;
-  border-radius: 10px;
+  max-width: 80%;
   position: relative;
-  word-break: break-word;
-  padding: 10px;
 }
 
 .sent {
   align-self: flex-end;
-  background: #134333;
   flex-direction: row-reverse;
 }
 
 .received {
   align-self: flex-start;
-  background: #1f272a;
+}
+
+.profile-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin: 0 8px;
 }
 
 .bubble {
+  background-color: #1f272a;
+  border-radius: 12px;
+  padding: 10px;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
-  max-width: 100%;
+}
+
+.sent .bubble {
+  background-color: #134333;
 }
 
 .name {
   font-weight: bold;
   margin-bottom: 4px;
-  font-size: 14px;
 }
 
 .time {
@@ -82,59 +85,37 @@ body {
   align-self: flex-end;
 }
 
-.avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  margin: 0 8px;
-}
-
-.material-icons {
-  vertical-align: middle;
-}
-
-#input-area {
+#message-box {
   display: flex;
   padding: 10px;
-  background: #111;
+  background-color: #111;
   border-top: 1px solid #222;
-  align-items: center;
 }
 
 #message-input {
   flex: 1;
-  resize: none;
-  height: 40px;
+  padding: 10px;
   border-radius: 8px;
   border: 2px solid red;
-  padding: 8px;
-  font-size: 14px;
-  outline: none;
   background: #000;
   color: white;
 }
 
 #send-btn {
-  background: #25D366;
+  background-color: #25D366;
   border: none;
   border-radius: 50%;
   padding: 10px;
   margin-left: 8px;
-  cursor: pointer;
   color: white;
+  cursor: pointer;
 }
 
 .delete-icon {
   position: absolute;
   top: 6px;
   right: 6px;
+  font-size: 18px;
   color: red;
   cursor: pointer;
-  font-size: 16px;
-}
-
-#typing-indicator {
-  font-size: 12px;
-  color: #ccc;
-  padding: 0 12px;
 }
