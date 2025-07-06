@@ -79,6 +79,7 @@ body {
   height: 32px;
   border-radius: 50%;
   margin: 0 8px;
+  align-self: flex-start;
 }
 
 .bubble {
@@ -88,6 +89,7 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
+  max-width: 100%;
 }
 
 .sent .bubble {
@@ -111,6 +113,9 @@ body {
   padding: 10px;
   background-color: #111;
   border-top: 1px solid #222;
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
 }
 
 #message-input {
@@ -121,6 +126,8 @@ body {
   background: #000;
   color: white;
   outline: none;
+  resize: none;
+  font-size: 14px;
 }
 
 #send-btn {
@@ -132,6 +139,9 @@ body {
   color: white;
   cursor: pointer;
   transition: background 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #send-btn:hover {
@@ -145,4 +155,36 @@ body {
   font-size: 18px;
   color: red;
   cursor: pointer;
+}
+
+.material-icons.verified {
+  font-size: 14px;
+  vertical-align: middle;
+  color: #1D9BF0;
+  margin-left: 3px;
+}
+
+@media (max-width: 600px) {
+  #chat-messages {
+    padding: 8px;
+    gap: 10px;
+  }
+
+  .bubble {
+    padding: 8px;
+  }
+
+  #message-box {
+    flex-direction: row;
+    align-items: center;
+    padding: 8px;
+  }
+
+  #message-input {
+    font-size: 13px;
+  }
+
+  #send-btn {
+    padding: 8px;
+  }
 }
