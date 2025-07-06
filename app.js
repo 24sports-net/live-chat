@@ -20,28 +20,27 @@ const guestName = document.getElementById("guest-name");
 const sendBtn = document.getElementById("send-btn");
 const messageInput = document.getElementById("message-input");
 const chatMessages = document.getElementById("chat-messages");
+const typingIndicator = document.getElementById("typing-indicator");
+const replyBox = document.getElementById("reply-box");
+const replyText = document.getElementById("reply-text");
+const cancelReply = document.getElementById("cancel-reply");
 
 const ADMIN_EMAILS = ["24sports.social@gmail.com"];
 const NAME_COLORS = ["#7F66FF", "#00C2D1", "#34B7F1", "#25D366", "#C4F800", "#FFD279", "#FF5C9D", "#53BDEB", "#A259FF", "#FF8A3D"];
 
 let currentUser = null;
 let currentColor = null;
+let replyTo = null;
 
-// Google Login
 loginBtn.onclick = () => {
   const provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider);
 };
 
-// Guest Login
 joinBtn.onclick = () => {
   const name = guestName.value.trim();
   if (!name) return alert("Enter nickname");
-  currentUser = {
-    displayName: name,
-    email: null,
-    photoURL: null
-  };
+  currentUser = { displayName: name, email: null, photoURL: null };
   currentColor = NAME_COLORS[Math.floor(Math.random() * NAME_COLORS.length)];
   loginContainer.style.display = "none";
   chatContainer.style.display = "flex";
@@ -64,6 +63,9 @@ messageInput.addEventListener("keydown", (e) => {
     e.preventDefault();
     sendMessage();
   }
+  db.ref("typing").set(currentUser.displayName);
+  clearTimeout(window.typingTimeout);
+  window.typingTimeout = setTimeout(() => db.ref("typing").remove(), 1000);
 });
 
 function sendMessage() {
@@ -83,11 +85,14 @@ function sendMessage() {
     photo: currentUser.photoURL || "https://www.gravatar.com/avatar/?d=mp",
     color: currentColor,
     text,
-    timestamp: Date.now()
+    timestamp: Date.now(),
+    replyTo: replyTo || null
   };
 
   db.ref("messages").push(msg);
   messageInput.value = "";
+  replyTo = null;
+  replyBox.style.display = "none";
 }
 
 function listenForMessages() {
@@ -110,10 +115,11 @@ function listenForMessages() {
       msgEl.className = `message ${isSender ? "sent" : "received"}`;
       msgEl.innerHTML = `
         <img class="profile-img" src="${msg.photo}" />
-        <div class="bubble">
+        <div class="bubble" onclick="setReply('${child.key}', '${msg.text.replace(/'/g, "\\'")}')">
           <div class="name" style="color:${isAdmin ? '#FF4C4C' : msg.color || '#fff'}">
-            ${msg.name}${isAdmin ? ' <span class="material-icons" style="font-size:14px;color:#1D9BF0;">verified</span>' : ''}
+            ${msg.name}${isAdmin ? ' <span class="material-icons verified">verified</span>' : ''}
           </div>
+          ${msg.replyTo ? `<div style="font-size:12px;color:#00A884;margin-bottom:4px;">Reply: ${msg.replyTo}</div>` : ''}
           <div>${msg.text}</div>
           <div class="time">${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
         </div>
@@ -124,7 +130,22 @@ function listenForMessages() {
 
     chatMessages.scrollTop = chatMessages.scrollHeight;
   });
+
+  db.ref("typing").on("value", (snap) => {
+    typingIndicator.textContent = snap.val() ? `${snap.val()} is typing...` : "";
+  });
 }
+
+function setReply(key, text) {
+  replyTo = text;
+  replyBox.style.display = "flex";
+  replyText.textContent = text.length > 40 ? text.slice(0, 40) + '…' : text;
+}
+
+cancelReply.onclick = () => {
+  replyTo = null;
+  replyBox.style.display = "none";
+};
 
 function deleteMessage(key) {
   if (confirm("Delete this message?")) {
