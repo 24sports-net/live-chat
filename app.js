@@ -15,7 +15,7 @@ const db = firebase.database();
 const loginContainer = document.getElementById("login-container");
 const chatContainer = document.getElementById("chat-container");
 const loginBtn = document.getElementById("login-btn");
-const guestBtn = document.getElementById("guest-btn");
+const joinBtn = document.getElementById("join-btn");
 const guestName = document.getElementById("guest-name");
 const sendBtn = document.getElementById("send-btn");
 const messageInput = document.getElementById("message-input");
@@ -34,7 +34,7 @@ loginBtn.onclick = () => {
 };
 
 // Guest Login
-guestBtn.onclick = () => {
+joinBtn.onclick = () => {
   const name = guestName.value.trim();
   if (!name) return alert("Enter nickname");
   currentUser = {
@@ -70,7 +70,7 @@ function sendMessage() {
   const text = messageInput.value.trim();
   if (!text) return;
 
-  const isLink = /https?:\\/\\//i.test(text);
+  const isLink = /https?:\/\//i.test(text);
   if (isLink && (!currentUser.email || !ADMIN_EMAILS.includes(currentUser.email))) {
     alert("Links are not allowed.");
     messageInput.value = "";
