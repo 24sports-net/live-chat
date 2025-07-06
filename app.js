@@ -107,7 +107,11 @@ function listenForMessages() {
         return;
       }
 
-      const isSender = currentUser.email === msg.email;
+      // ✅ FIXED: isSender logic to support guest name-based check
+      const isSender = currentUser.email
+        ? currentUser.email === msg.email
+        : currentUser.displayName === msg.name && msg.email === null;
+
       const isAdmin = ADMIN_EMAILS.includes(msg.email);
       const isCurrentAdmin = currentUser.email && ADMIN_EMAILS.includes(currentUser.email);
 
