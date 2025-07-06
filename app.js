@@ -107,12 +107,9 @@ function listenForMessages() {
         return;
       }
 
-      let isSender = false;
-      if (currentUser.email && msg.email) {
-        isSender = currentUser.email === msg.email;
-      } else if (!currentUser.email && !msg.email && currentUser.displayName === msg.name) {
-        isSender = true;
-      }
+      const isSender =
+        (currentUser.email && msg.email && currentUser.email === msg.email) ||
+        (!currentUser.email && !msg.email && currentUser.displayName === msg.name);
 
       const isAdmin = ADMIN_EMAILS.includes(msg.email);
       const isCurrentAdmin = currentUser.email && ADMIN_EMAILS.includes(currentUser.email);
