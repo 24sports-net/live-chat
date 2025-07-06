@@ -20,6 +20,13 @@
 
   <div id="chat-container" style="display: none;">
     <div id="chat-messages"></div>
+    <div id="typing-indicator" style="padding: 5px 15px; font-size: 12px; color: #ccc;"></div>
+    
+    <div id="reply-box" style="display: none;">
+      <span id="reply-text"></span>
+      <button id="cancel-reply" class="material-icons">close</button>
+    </div>
+
     <div id="message-box">
       <input type="text" id="message-input" placeholder="Type a message..." />
       <button id="send-btn"><span class="material-icons">send</span></button>
