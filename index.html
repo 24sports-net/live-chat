@@ -2,18 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>24Sports Chat</title>
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div id="login-container">
     <h2>Join the Chat</h2>
     <button id="login-btn">Sign in with Google</button>
-    <div>or</div>
-    <input type="text" id="guest-name" placeholder="Enter nickname" maxlength="15" />
-    <button id="guest-btn">Continue as Guest</button>
+    <div style="margin: 10px 0;">or</div>
+    <div style="display: flex; gap: 8px;">
+      <input type="text" id="guest-name" placeholder="Enter nickname" maxlength="15" />
+      <button id="join-btn">Join the Chat</button>
+    </div>
   </div>
 
   <div id="chat-container" style="display: none;">
