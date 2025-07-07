@@ -37,9 +37,11 @@ auth.onAuthStateChanged(user => {
     document.getElementById("chat-container").style.display = "flex";
 
     const userRef = db.ref("users/" + user.uid);
-    userRef.once("value", snapshot => {
-      if (!snapshot.exists()) {
-        userRef.set({ joined: true });
+
+    userRef.once("value").then(snapshot => {
+      const data = snapshot.val();
+      if (!data || !data.hasJoined) {
+        userRef.set({ hasJoined: true });
         db.ref("messages").push({
           type: "system",
           text: `${user.displayName} joined the chat`,
