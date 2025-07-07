@@ -3,6 +3,7 @@ body {
   background: #000;
   font-family: Arial, sans-serif;
   color: #fff;
+  overflow-x: hidden;
 }
 
 #login-container {
@@ -29,6 +30,7 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  overflow-x: hidden;
 }
 
 #chat-messages {
@@ -68,7 +70,6 @@ body {
   background: #1f272a;
   padding: 10px 12px;
   border-radius: 12px;
-  position: relative;
   max-width: 100%;
 }
 
@@ -85,6 +86,12 @@ body {
   font-size: 10px;
   color: #999;
   text-align: right;
+}
+
+.reply-to {
+  font-size: 11px;
+  color: #00a884;
+  margin-bottom: 4px;
 }
 
 .admin-verified {
@@ -116,7 +123,7 @@ body {
 }
 
 .chat-input-area button {
-  background: #121133;
+  background: #25D366;
   border: none;
   border-radius: 50%;
   width: 40px;
@@ -144,10 +151,11 @@ body {
 }
 
 .delete-btn {
-  position: absolute;
-  top: 0;
-  right: -24px;
+  font-size: 18px;
   color: red;
   cursor: pointer;
-  font-size: 18px;
+  position: absolute;
+  right: -24px;
+  top: 50%;
+  transform: translateY(-50%);
 }
