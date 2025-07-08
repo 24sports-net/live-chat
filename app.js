@@ -68,7 +68,7 @@ function formatMessage(text) {
     .replace(/\*_([^*]+)_\*/g, '<b><i>$1</i></b>')
     .replace(/\*([^*]+)\*/g, '<b>$1</b>')
     .replace(/_([^_]+)_/g, '<i>$1</i>')
-    .replace(/"([^"]+)"/g, '<span style="background:yellow;color:black;padding:2px 4px;border-radius:3px;">$1</span>')
+    .replace(/\{(.*?)\}/g, '<span style="background:yellow;color:black;padding:2px 4px;border-radius:3px;">$1</span>')
     .replace(/~([^~]+)~/g, '<s>$1</s>')
     .replace(/`([^`]+)`/g, '<code style="background:#222;padding:2px 4px;border-radius:4px;">$1</code>')
     .replace(/@(\w+)/g, '<span style="color:#1DA1F2">@$1</span>');
