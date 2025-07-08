@@ -1,6 +1,7 @@
 const allowedHosts = [
   "24sports-network.blogspot.com",
-  "24sports-net.blogspot.com"
+  "24sports-net.blogspot.com",
+  "https://24sports-net.github.io/live-chat"
 ];
 
 const currentHost = window.location.hostname;
