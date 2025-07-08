@@ -1,3 +1,22 @@
+const allowedHosts = [
+  "24sports-network.blogspot.com",
+  "24sports-net.blogspot.com"
+];
+
+const currentHost = window.location.hostname;
+
+if (!allowedHosts.includes(currentHost)) {
+  console.warn(
+    `%c⚠️ Unauthorized usage detected!`,
+    "color: yellow; font-size: 16px;"
+  );
+  console.warn(`%cThis chat is only allowed on:`, "color: orange;");
+  console.warn(allowedHosts.join("\n"));
+
+  // Block the UI entirely
+  document.body.innerHTML = "<h2 style='color: red; text-align:center; margin-top:50px;'>Unauthorized domain.</h2>";
+  throw new Error("Unauthorized domain");
+}
 const firebaseConfig = {
   apiKey: "AIzaSyD4-VCUGPN1XyQ1Xr-nsygATasnRrukWr4",
   authDomain: "spn-livechat.firebaseapp.com",
