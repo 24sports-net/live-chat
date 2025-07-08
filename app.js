@@ -17,13 +17,11 @@ const COLORS = ["#7F66FF", "#00C2D1", "#34B7F1", "#25D366", "#C4F800", "#FFD279"
 let userColors = {};
 let currentUser = null;
 let replyTo = null;
-let hasJoined = false;
 
 const loginBtn = document.getElementById("login-btn");
 const chatMessages = document.getElementById("chat-messages");
 const messageInput = document.getElementById("message-input");
 const sendBtn = document.getElementById("send-btn");
-const typingIndicator = document.getElementById("typing-indicator");
 
 loginBtn.onclick = () => {
   const provider = new firebase.auth.GoogleAuthProvider();
@@ -37,10 +35,8 @@ auth.onAuthStateChanged(user => {
     document.getElementById("chat-container").style.display = "flex";
 
     const userRef = db.ref("users/" + user.uid);
-
     userRef.once("value").then(snapshot => {
-      const data = snapshot.val();
-      if (!data || !data.hasJoined) {
+      if (!snapshot.exists()) {
         userRef.set({ hasJoined: true });
         db.ref("messages").push({
           type: "system",
@@ -52,23 +48,30 @@ auth.onAuthStateChanged(user => {
   }
 });
 
+sendBtn.onclick = sendMessage;
 messageInput.addEventListener("keydown", e => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
     sendMessage();
-  } else {
-    db.ref("typing").set(currentUser.displayName);
-    setTimeout(() => db.ref("typing").remove(), 3000);
   }
 });
-
-sendBtn.onclick = sendMessage;
 
 function assignColor(email) {
   if (!userColors[email]) {
     userColors[email] = COLORS[Object.keys(userColors).length % COLORS.length];
   }
   return userColors[email];
+}
+
+function formatMessage(text) {
+  return text
+    .replace(/\*_([^*]+)_\*/g, '<b><i>$1</i></b>')
+    .replace(/\*([^*]+)\*/g, '<b>$1</b>')
+    .replace(/_([^_]+)_/g, '<i>$1</i>')
+    .replace(/"([^"]+)"/g, '<span style="background:yellow;color:black;padding:2px 4px;border-radius:3px;">$1</span>')
+    .replace(/~([^~]+)~/g, '<s>$1</s>')
+    .replace(/`([^`]+)`/g, '<code style="background:#222;padding:2px 4px;border-radius:4px;">$1</code>')
+    .replace(/@(\w+)/g, '<span style="color:#1DA1F2">@$1</span>');
 }
 
 function sendMessage() {
@@ -88,15 +91,12 @@ function sendMessage() {
     photo: currentUser.photoURL || "https://www.gravatar.com/avatar/?d=mp",
     text,
     timestamp: Date.now(),
-    replyTo: replyTo || null,
-    type: "user"
+    replyTo: replyTo || null
   };
-
   db.ref("messages").push(message);
   messageInput.value = "";
   replyTo = null;
   document.getElementById("reply-preview").style.display = "none";
-  db.ref("typing").remove();
 }
 
 function cancelReply() {
@@ -110,40 +110,32 @@ function deleteMessage(key) {
   }
 }
 
-db.ref("typing").on("value", snap => {
-  const val = snap.val();
-  typingIndicator.style.display = val && val !== currentUser.displayName ? "block" : "none";
-  typingIndicator.innerText = val ? `${val} is typing...` : "";
-});
-
 db.ref("messages").on("value", snap => {
   chatMessages.innerHTML = "";
   const now = Date.now();
-
   snap.forEach(child => {
     const msg = child.val();
     const age = now - msg.timestamp;
-
-    if (msg.type === "system") {
-      const sysEl = document.createElement("div");
-      sysEl.style.textAlign = "center";
-      sysEl.style.color = "#aaa";
-      sysEl.style.fontSize = "12px";
-      sysEl.innerText = msg.text;
-      chatMessages.appendChild(sysEl);
-      return;
-    }
 
     if (age >= 86400000) {
       db.ref("messages/" + child.key).remove();
       return;
     }
 
+    if (msg.type === "system") {
+      const msgEl = document.createElement("div");
+      msgEl.className = "system-message";
+      msgEl.innerHTML = `
+        <div>${msg.text}</div>
+        ${ADMIN_EMAILS.includes(currentUser.email) ? `<span class="material-icons delete-btn" onclick="deleteMessage('${child.key}')">delete</span>` : ""}
+      `;
+      chatMessages.appendChild(msgEl);
+      return;
+    }
+
     const isSent = msg.email === currentUser?.email;
     const isAdmin = ADMIN_EMAILS.includes(msg.email);
     const nameColor = isAdmin ? "#FF4C4C" : assignColor(msg.email);
-
-    const mentionFormatted = msg.text.replace(/@\w+/g, match => `<span class="mention">${match}</span>`);
 
     const msgEl = document.createElement("div");
     msgEl.className = `message ${isSent ? "sent" : "received"}`;
@@ -154,13 +146,23 @@ db.ref("messages").on("value", snap => {
           ${msg.name}${isAdmin ? ' <span class="material-icons admin-verified">verified</span>' : ""}
         </div>
         ${msg.replyTo ? `<div class="reply-to">Replying to: ${msg.replyTo.text}</div>` : ""}
-        <div>${mentionFormatted}</div>
+        <div>${formatMessage(msg.text)}</div>
         <div class="time">${new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
-        ${ADMIN_EMAILS.includes(currentUser.email) ? `<span class="material-icons delete-btn" onclick="deleteMessage('${child.key}')">delete</span>` : ""}
       </div>
+      ${ADMIN_EMAILS.includes(currentUser.email) ? `<span class="material-icons delete-btn" onclick="deleteMessage('${child.key}')">delete</span>` : ""}
     `;
+
+    msgEl.ondblclick = () => {
+      replyTo = {
+        name: msg.name,
+        text: msg.text
+      };
+      document.getElementById("reply-to-name").innerText = msg.name;
+      document.getElementById("reply-to-text").innerText = msg.text;
+      document.getElementById("reply-preview").style.display = "block";
+    };
+
     chatMessages.appendChild(msgEl);
   });
-
   chatMessages.scrollTop = chatMessages.scrollHeight;
 });
