@@ -33,6 +33,18 @@ auth.onAuthStateChanged(user => {
     currentUser = user;
     document.getElementById("login-container").style.display = "none";
     document.getElementById("chat-container").style.display = "flex";
+
+    const userRef = db.ref("users/" + user.uid);
+    userRef.once("value").then(snapshot => {
+      if (!snapshot.exists()) {
+        userRef.set({ hasJoined: true });
+        db.ref("messages").push({
+          type: "system",
+          text: `${user.displayName} joined the chat`,
+          timestamp: Date.now()
+        });
+      }
+    });
   }
 });
 
@@ -49,6 +61,17 @@ function assignColor(email) {
     userColors[email] = COLORS[Object.keys(userColors).length % COLORS.length];
   }
   return userColors[email];
+}
+
+function formatMessage(text) {
+  return text
+    .replace(/\*_([^*]+)_\*/g, '<b><i>$1</i></b>')
+    .replace(/\*([^*]+)\*/g, '<b>$1</b>')
+    .replace(/_([^_]+)_/g, '<i>$1</i>')
+    .replace(/"([^"]+)"/g, '<span style="background:yellow;color:black;padding:2px 4px;border-radius:3px;">$1</span>')
+    .replace(/~([^~]+)~/g, '<s>$1</s>')
+    .replace(/`([^`]+)`/g, '<code style="background:#222;padding:2px 4px;border-radius:4px;">$1</code>')
+    .replace(/@(\w+)/g, '<span style="color:#1DA1F2">@$1</span>');
 }
 
 function sendMessage() {
@@ -76,15 +99,15 @@ function sendMessage() {
   document.getElementById("reply-preview").style.display = "none";
 }
 
+function cancelReply() {
+  replyTo = null;
+  document.getElementById("reply-preview").style.display = "none";
+}
+
 function deleteMessage(key) {
   if (confirm("Are you sure you want to delete this message?")) {
     db.ref("messages/" + key).remove();
   }
-}
-
-function cancelReply() {
-  replyTo = null;
-  document.getElementById("reply-preview").style.display = "none";
 }
 
 db.ref("messages").on("value", snap => {
@@ -96,6 +119,17 @@ db.ref("messages").on("value", snap => {
 
     if (age >= 86400000) {
       db.ref("messages/" + child.key).remove();
+      return;
+    }
+
+    if (msg.type === "system") {
+      const msgEl = document.createElement("div");
+      msgEl.className = "system-message";
+      msgEl.innerHTML = `
+        <div>${msg.text}</div>
+        ${ADMIN_EMAILS.includes(currentUser.email) ? `<span class="material-icons delete-btn" onclick="deleteMessage('${child.key}')">delete</span>` : ""}
+      `;
+      chatMessages.appendChild(msgEl);
       return;
     }
 
@@ -112,11 +146,22 @@ db.ref("messages").on("value", snap => {
           ${msg.name}${isAdmin ? ' <span class="material-icons admin-verified">verified</span>' : ""}
         </div>
         ${msg.replyTo ? `<div class="reply-to">Replying to: ${msg.replyTo.text}</div>` : ""}
-        <div>${msg.text}</div>
+        <div>${formatMessage(msg.text)}</div>
         <div class="time">${new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
       </div>
       ${ADMIN_EMAILS.includes(currentUser.email) ? `<span class="material-icons delete-btn" onclick="deleteMessage('${child.key}')">delete</span>` : ""}
     `;
+
+    msgEl.ondblclick = () => {
+      replyTo = {
+        name: msg.name,
+        text: msg.text
+      };
+      document.getElementById("reply-to-name").innerText = msg.name;
+      document.getElementById("reply-to-text").innerText = msg.text;
+      document.getElementById("reply-preview").style.display = "block";
+    };
+
     chatMessages.appendChild(msgEl);
   });
   chatMessages.scrollTop = chatMessages.scrollHeight;
